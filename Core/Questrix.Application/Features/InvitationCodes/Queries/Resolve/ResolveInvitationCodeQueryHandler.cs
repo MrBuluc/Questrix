@@ -16,17 +16,6 @@ namespace Questrix.Application.Features.InvitationCodes.Queries.Resolve
 
         public async Task<ResolveInvitationCodeQueryResponse> Handle(ResolveInvitationCodeQueryRequest request, CancellationToken cancellationToken)
         {
-            /*
-             invitationService.ResolveSurveyIdAsync()
-            InvitationCode invitationCode = (await unitOfWork.GetReadRepository<InvitationCode>().GetAsync(ic => ic.Code == request.Code && !ic.IsDeleted, cancellationToken)) ?? throw new InvitationCodeNotFoundException(request.Code);
-
-            if (invitationCode.UsegeCount > invitationCode.MaxUsege)
-                throw new InvitationCodeMaxUsegeException();
-
-            if (invitationCode.ExpiresAt < DateTime.Now)
-                throw new InvitationCodeExpiredException();
-            */
-
             Guid surveyId = await invitationService.ResolveSurveyIdAsync(request.Code, cancellationToken);
             Survey survey = (await unitOfWork.GetReadRepository<Survey>().GetAsync(s => s.Id == surveyId && !s.IsDeleted, cancellationToken, include: queryable => queryable.Include(s => s.Nodes))) ?? throw new SurveyNotFoundException();
 

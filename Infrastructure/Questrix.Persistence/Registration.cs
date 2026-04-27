@@ -2,9 +2,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Questrix.Application.Interfaces.Repositories;
+using Questrix.Application.Interfaces.Services;
 using Questrix.Application.Interfaces.UnitOfWorks;
 using Questrix.Persistence.Contexts;
 using Questrix.Persistence.Repositories;
+using Questrix.Persistence.Services;
 using Questrix.Persistence.UnitOfWorks;
 
 namespace Questrix.Persistence
@@ -19,6 +21,8 @@ namespace Questrix.Persistence
             services.AddScoped(typeof(IWriteRepository<>), typeof(WriteRepository<>));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            services.AddScoped<IInvitationService, InvitationService>();
 
             return services;
         }
