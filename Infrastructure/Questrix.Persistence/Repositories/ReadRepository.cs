@@ -1,0 +1,34 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using Questrix.Application.Interfaces.Repositories;
+using Questrix.Domain.Common;
+using System.Linq.Expressions;
+
+namespace Questrix.Persistence.Repositories
+{
+    public class ReadRepository<T>(DbContext dbContext) : IReadRepository<T> where T : class, IEntityBase, new()
+    {
+        private readonly DbContext dbContext = dbContext;
+        private DbSet<T> Table { get => dbContext.Set<T>(); }
+
+        public async Task<IList<T>> GetAllAsync(CancellationToken cancellationToken, Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, bool enableTracking = false)
+        {
+            IQueryable<T> queryable = Table;
+            if (!enableTracking) queryable = queryable.AsNoTracking();
+            if (include is not null) queryable = include(queryable);
+            if (predicate is not null) queryable = queryable.Where(predicate);
+            if (orderBy is not null) queryable = orderBy(queryable);
+            return await queryable.ToListAsync(cancellationToken);
+        }
+
+        public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken, Func<IQueryable<T>, IIncludableQueryable<T, object?>>? include = null, bool enableTracking = false)
+        {
+            IQueryable<T> queryable = Table;
+            if (!enableTracking) queryable = queryable.AsNoTracking();
+            if (include is not null) queryable = include(queryable);
+
+            queryable = queryable.Where(predicate);
+            return await queryable.FirstOrDefaultAsync(cancellationToken);
+        }
+    }
+}
