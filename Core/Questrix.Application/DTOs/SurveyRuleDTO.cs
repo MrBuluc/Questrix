@@ -2,8 +2,8 @@
 {
     public class SurveyRuleDTO
     {
-        public string Condition { get; set; }
-        public Guid NextNodeId { get; set; }
+        public string? Condition { get; set; }
+        public Guid? NextNodeId { get; set; }
         public bool IsDefault { get; set; }
     }
 }

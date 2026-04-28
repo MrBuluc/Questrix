@@ -15,7 +15,7 @@ namespace Questrix.Persistence
     {
         public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<QuestrixDbContext>(opt => opt.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<QuestrixDbContext>(opt => opt.UseNpgsql(configuration.GetConnectionString("PostgreSQL")));
 
             services.AddScoped(typeof(IReadRepository<>), typeof(ReadRepository<>));
             services.AddScoped(typeof(IWriteRepository<>), typeof(WriteRepository<>));

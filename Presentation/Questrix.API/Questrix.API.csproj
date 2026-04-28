@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>f39e37d2-c714-441f-a7e5-861e13bd762b</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Questrix.Mapper\Questrix.Mapper.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Questrix.Infrastructure\Questrix.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Questrix.Persistence\Questrix.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Questrix.Persistence.Contexts;
@@ -11,9 +12,11 @@ using Questrix.Persistence.Contexts;
 namespace Questrix.Persistence.Migrations
 {
     [DbContext(typeof(QuestrixDbContext))]
-    partial class QuestrixDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427144623_SurveyNodeTypeEnum")]
+    partial class SurveyNodeTypeEnum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,6 +189,7 @@ namespace Questrix.Persistence.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Metadata")
+                        .IsRequired()
                         .HasColumnType("jsonb");
 
                     b.Property<string>("Question")
@@ -252,6 +256,7 @@ namespace Questrix.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Condition")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedDate")

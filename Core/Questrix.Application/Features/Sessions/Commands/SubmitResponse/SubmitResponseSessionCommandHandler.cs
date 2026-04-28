@@ -1,13 +1,16 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Questrix.Application.Bases;
+using Questrix.Application.DTOs;
 using Questrix.Application.Exceptions;
+using Questrix.Application.Interfaces.AutoMapper;
 using Questrix.Application.Interfaces.Services;
 using Questrix.Application.Interfaces.UnitOfWorks;
 using Questrix.Domain.Entities;
 
 namespace Questrix.Application.Features.Sessions.Commands.SubmitResponse
 {
-    public class SubmitResponseSessionCommandHandler(IUnitOfWork unitOfWork, ISurveyExecutionService surveyExecutionService) : IRequestHandler<SubmitResponseSessionCommandRequest, SubmitResponseSessionCommandResponse>
+    public class SubmitResponseSessionCommandHandler(IMapper mapper, IUnitOfWork unitOfWork, ISurveyExecutionService surveyExecutionService) : BaseHandler(mapper, unitOfWork), IRequestHandler<SubmitResponseSessionCommandRequest, SubmitResponseSessionCommandResponse>
     {
         private readonly ISurveyExecutionService surveyExecutionService = surveyExecutionService;
 
@@ -49,7 +52,7 @@ namespace Questrix.Application.Features.Sessions.Commands.SubmitResponse
             } : new()
             {
                 IsCompleted = false,
-                NextQuestion = nextNodeQuestion
+                SurveyNode = mapper.Map<SurveyNodeDTO, SurveyNode>(currentNode)
             };
         }
     }

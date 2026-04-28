@@ -22,6 +22,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Questrix.Application", "Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Questrix.Mapper", "Core\Questrix.Mapper\Questrix.Mapper.csproj", "{C09D4092-8A90-4DD1-8DA2-2B490EA54709}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{6D9577E4-3FA0-4667-A2CB-1CDC9C3E3CB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Questrix.API", "Presentation\Questrix.API\Questrix.API.csproj", "{9F592990-BCE6-41A3-8D83-57AB2AB12A2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +52,10 @@ Global
 		{C09D4092-8A90-4DD1-8DA2-2B490EA54709}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C09D4092-8A90-4DD1-8DA2-2B490EA54709}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C09D4092-8A90-4DD1-8DA2-2B490EA54709}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F592990-BCE6-41A3-8D83-57AB2AB12A2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F592990-BCE6-41A3-8D83-57AB2AB12A2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F592990-BCE6-41A3-8D83-57AB2AB12A2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F592990-BCE6-41A3-8D83-57AB2AB12A2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +66,7 @@ Global
 		{CD82D654-47D5-470F-9409-65697B8CCFF5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{04225641-8E6D-4479-AC1E-315F17F8610B} = {E1A27DEF-DD07-4E64-805F-859E61464041}
 		{C09D4092-8A90-4DD1-8DA2-2B490EA54709} = {E1A27DEF-DD07-4E64-805F-859E61464041}
+		{9F592990-BCE6-41A3-8D83-57AB2AB12A2C} = {6D9577E4-3FA0-4667-A2CB-1CDC9C3E3CB5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A51607D6-AB31-4D06-BD2D-5A6C2C02AFDF}

@@ -1,15 +1,17 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Questrix.Application.Bases;
+using Questrix.Application.DTOs;
 using Questrix.Application.Exceptions;
+using Questrix.Application.Interfaces.AutoMapper;
 using Questrix.Application.Interfaces.Services;
 using Questrix.Application.Interfaces.UnitOfWorks;
 using Questrix.Domain.Entities;
 
 namespace Questrix.Application.Features.Sessions.Commands.Start
 {
-    public class StartSessionCommandHandler(IUnitOfWork unitOfWork, IInvitationService invitationService) : IRequestHandler<StartSessionCommandRequest, StartSessionCommandResponse>
+    public class StartSessionCommandHandler(IMapper mapper, IUnitOfWork unitOfWork, IInvitationService invitationService) : BaseHandler(mapper, unitOfWork), IRequestHandler<StartSessionCommandRequest, StartSessionCommandResponse>
     {
-        private readonly IUnitOfWork unitOfWork = unitOfWork;
         private readonly IInvitationService invitationService = invitationService;
 
         public async Task<StartSessionCommandResponse> Handle(StartSessionCommandRequest request, CancellationToken cancellationToken)
@@ -29,8 +31,7 @@ namespace Questrix.Application.Features.Sessions.Commands.Start
             return new()
             {
                 Id = session.Id,
-                CurrentNodeId = firstNode.Id,
-                FirstQuestion = firstNode.Question
+                SurveyNode = mapper.Map<SurveyNodeDTO, SurveyNode>(firstNode)
             };
         }
     }

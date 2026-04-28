@@ -14,6 +14,8 @@ namespace Questrix.Persistence.Configurations
             builder.Property(sn => sn.Type).IsRequired();
             builder.Property(sn => sn.Metadata).HasColumnType("jsonb");
 
+            builder.Property(sn => sn.Type).HasConversion<string>().IsRequired();
+
             builder.HasOne(sn => sn.Survey)
                 .WithMany(s => s.Nodes)
                 .HasForeignKey(sn => sn.SurveyId);

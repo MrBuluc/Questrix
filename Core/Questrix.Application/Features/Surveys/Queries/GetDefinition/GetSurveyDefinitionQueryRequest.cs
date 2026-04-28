@@ -4,6 +4,6 @@ namespace Questrix.Application.Features.Surveys.Queries.GetDefinition
 {
     public class GetSurveyDefinitionQueryRequest : IRequest<GetSurveyDefinitionQueryResponse>
     {
-        public Guid Id { get; set; }
+        public string InvitationCode { get; set; }
     }
 }

@@ -1,0 +1,6 @@
+@Questrix.API_HostAddress = http://localhost:5239
+
+GET {{Questrix.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,30 +1,38 @@
 ﻿using MediatR;
+using Questrix.Application.DTOs;
 using Questrix.Application.Features.Sessions.Commands.Start;
 using Questrix.Application.Features.Sessions.Commands.SubmitResponse;
 using Questrix.Application.Features.Sessions.Queries.GetCurrentQuestion;
+using Questrix.Application.Features.Surveys.Queries.GetDefinition;
 using Questrix.Infrastructure.Telegram.Services.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Questrix.Infrastructure.Telegram.Services
 {
-    public class UpdateHandler(IMediator mediator, ITelegramKeyboardService telegramKeyboardService) : IUpdateHandler
+    public class UpdateHandler(IMediator mediator, ITelegramKeyboardService telegramKeyboardService, ITelegramTextFormatter telegramTextFormatter) : IUpdateHandler
     {
         private readonly IMediator mediator = mediator;
         private readonly ITelegramKeyboardService telegramKeyboardService = telegramKeyboardService;
+        private readonly ITelegramTextFormatter telegramTextFormatter = telegramTextFormatter;
 
         public async Task HandleAsync(ITelegramBotClient telegramBotClient, Update update, CancellationToken cancellationToken)
         {
+            string? text = update.Message?.Text;
+            if (text is null)
+                return;
+
+            string? userId = update.Message?.From?.Id.ToString();
+            if (userId is null)
+                return;
+
+            long? chatId = update.Message?.Chat.Id;
+            if (chatId is null)
+                return;
+
             try
             {
-                string? text = update.Message?.Text;
-                if (text is null)
-                    return;
-
-                string? userId = update.Message?.From?.Id.ToString();
-                if (userId is null)
-                    return;
-
                 // 1. Check active session
                 GetCurrentQuestionSessionQueryResponse? currentQuestion = await mediator.Send(new GetCurrentQuestionSessionQueryRequest
                 {
@@ -34,11 +42,18 @@ namespace Questrix.Infrastructure.Telegram.Services
                 if (currentQuestion is null)
                 {
                     // No session → treat as invitation code
-                    await telegramBotClient.SendMessage(chatId: update.Message!.Chat.Id, text: (await mediator.Send(new StartSessionCommandRequest
+                    GetSurveyDefinitionQueryResponse getSurveyDefinitionQueryResponse = await mediator.Send(new GetSurveyDefinitionQueryRequest
                     {
-                        InvitationCode = text,
-                        UserId = userId
-                    }, cancellationToken)).FirstQuestion, cancellationToken: cancellationToken);
+                        InvitationCode = text
+                    }, cancellationToken);
+                    await telegramBotClient.SendMessage(update.Message!.Chat.Id, getSurveyDefinitionQueryResponse.Title, cancellationToken: cancellationToken);
+                    await telegramBotClient.SendMessage(update.Message!.Chat.Id, getSurveyDefinitionQueryResponse.Description, cancellationToken: cancellationToken);
+
+                    await SendNode(telegramBotClient, chatId.Value, (await mediator.Send(new StartSessionCommandRequest
+                    {
+                        UserId = userId,
+                        InvitationCode = text
+                    }, cancellationToken)).SurveyNode, cancellationToken);
 
                     return;
                 }
@@ -52,17 +67,19 @@ namespace Questrix.Infrastructure.Telegram.Services
 
                 if (response.IsCompleted)
                 {
-                    await telegramBotClient.SendMessage(update.Message!.Chat.Id, "Survey completed. Thank you!", cancellationToken: cancellationToken);
+                    await telegramBotClient.SendMessage(chatId, "Survey completed. Thank you!",  replyMarkup: new ReplyKeyboardRemove(), cancellationToken: cancellationToken);
 
                     return;
                 }
 
-                await telegramBotClient.SendMessage(update.Message!.Chat!.Id, response.NextQuestion, replyMarkup: telegramKeyboardService.Build(currentQuestion.Options, currentQuestion.Type), cancellationToken: cancellationToken);
+                await SendNode(telegramBotClient, chatId.Value, response.SurveyNode, cancellationToken);
             }
             catch (Exception e)
             {
                 await telegramBotClient.SendMessage(update.Message!.Chat!.Id, $"Something went wrong. {e}", cancellationToken: cancellationToken);
             }
         }
+
+        private async Task SendNode(ITelegramBotClient telegramBotClient, long chatId, SurveyNodeDTO surveyNodeDTO, CancellationToken cancellationToken) => await telegramBotClient.SendMessage(chatId, telegramTextFormatter.Format(surveyNodeDTO), replyMarkup: telegramKeyboardService.Build(surveyNodeDTO.Type, surveyNodeDTO.Options, surveyNodeDTO.Metadata), cancellationToken: cancellationToken);
     }
 }

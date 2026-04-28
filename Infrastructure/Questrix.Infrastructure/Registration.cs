@@ -22,6 +22,7 @@ namespace Questrix.Infrastructure
             services.AddSingleton<IUpdateHandler, UpdateHandler>();
             services.AddSingleton<ITelegramBotService, TelegramBotService>();
             services.AddSingleton<ITelegramKeyboardService, TelegramKeyboardService>();
+            services.AddSingleton<ITelegramTextFormatter, TelegramTextFormatter>();
 
             return services;
         }
