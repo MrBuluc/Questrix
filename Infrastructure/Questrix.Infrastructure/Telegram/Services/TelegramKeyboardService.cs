@@ -9,11 +9,11 @@ namespace Questrix.Infrastructure.Telegram.Services
 {
     public class TelegramKeyboardService : ITelegramKeyboardService
     {
-        public ReplyKeyboardMarkup? Build(SurveyNodeType type, IList<SurveyOptionDTO>? options, string? metadata) => type switch
+        public ReplyMarkup? Build(SurveyNodeType type, IList<SurveyOptionDTO>? options, string? metadata) => type switch
         {
             SurveyNodeType.MultipleChoice => BuildMultipleChoice(options!),
             SurveyNodeType.LinearScale => BuildLinearScale(metadata!),
-            _ => null, // ShortAnswer → no keyboard
+            _ => new ReplyKeyboardRemove(), // ShortAnswer → no keyboard
         };
 
         private static ReplyKeyboardMarkup BuildMultipleChoice(IList<SurveyOptionDTO> options) => new(options

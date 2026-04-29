@@ -6,6 +6,6 @@ namespace Questrix.Infrastructure.Telegram.Services.Interfaces
 {
     public interface ITelegramKeyboardService
     {
-        ReplyKeyboardMarkup? Build(SurveyNodeType type, IList<SurveyOptionDTO>? options, string? metadata);
+        ReplyMarkup? Build(SurveyNodeType type, IList<SurveyOptionDTO>? options, string? metadata);
     }
 }
