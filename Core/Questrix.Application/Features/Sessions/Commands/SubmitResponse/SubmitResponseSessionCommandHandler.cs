@@ -6,7 +6,9 @@ using Questrix.Application.Exceptions;
 using Questrix.Application.Interfaces.AutoMapper;
 using Questrix.Application.Interfaces.Services;
 using Questrix.Application.Interfaces.UnitOfWorks;
+using Questrix.Application.Models;
 using Questrix.Domain.Entities;
+using System.Text.Json;
 
 namespace Questrix.Application.Features.Sessions.Commands.SubmitResponse
 {
@@ -26,25 +28,41 @@ namespace Questrix.Application.Features.Sessions.Commands.SubmitResponse
             {
                 SessionId = session.Id,
                 NodeId = currentNode.Id,
-                Answer = request.Answer
+                Answer = JsonSerializer.Serialize(new Answer
+                {
+                    Value = request.Answer
+                })
             }, cancellationToken);
 
+            currentNode = (await unitOfWork.GetReadRepository<SurveyNode>().GetAsync(sn => sn.Id == currentNode.Id && !sn.IsDeleted, cancellationToken, queryable => queryable.Include(sn => sn.Rules)
+            .Include(sn => sn.Options)))!;
+
             Guid? nextNodeId = surveyExecutionService.ResolveNextNode(currentNode, request.Answer);
-            string nextNodeQuestion = string.Empty;
+            SurveyNode? nextNode = null;
 
             if (nextNodeId is null)
             {
                 session.Status = "Completed";
+
+                InvitationCode invitationCode = (await unitOfWork.GetReadRepository<InvitationCode>().GetAsync(ic => ic.SurveyId == survey.Id && !ic.IsDeleted, cancellationToken)) ?? throw new InvitationCodeNotFoundBySurveyIdException(survey.Id);
+                invitationCode.UsegeCount++;
+
+                await unitOfWork.GetWriteRepository<InvitationCode>().UpdateAsync(invitationCode);
             }
             else
             {
                 session.CurrentNodeId = nextNodeId.Value;
-                nextNodeQuestion = survey.Nodes.First(sn => sn.Id == session.CurrentNodeId && !sn.IsDeleted).Question;
+                nextNode = survey.Nodes.First(sn => sn.Id == session.CurrentNodeId && !sn.IsDeleted);
+                nextNode = (await unitOfWork.GetReadRepository<SurveyNode>().GetAsync(sn => sn.Id == nextNode.Id && !sn.IsDeleted, cancellationToken, queryable => queryable.Include(sn => sn.Rules)
+            .Include(sn => sn.Options)))!;
             }
 
             await unitOfWork.GetWriteRepository<Session>().UpdateAsync(session);
 
             await unitOfWork.SaveAsync(cancellationToken);
+
+            mapper.Map<SurveyOptionDTO, SurveyOption>(new SurveyOption());
+            mapper.Map<SurveyRuleDTO, SurveyRule>(new SurveyRule());
 
             return nextNodeId is null ? new()
             {
@@ -52,7 +70,7 @@ namespace Questrix.Application.Features.Sessions.Commands.SubmitResponse
             } : new()
             {
                 IsCompleted = false,
-                SurveyNode = mapper.Map<SurveyNodeDTO, SurveyNode>(currentNode)
+                SurveyNode = mapper.Map<SurveyNodeDTO, SurveyNode>(nextNode!)
             };
         }
     }

@@ -28,6 +28,14 @@ namespace Questrix.Application.Features.Sessions.Commands.Start
                 Status = "Active"
             }, cancellationToken);
 
+            await unitOfWork.SaveAsync(cancellationToken);
+
+            firstNode = (await unitOfWork.GetReadRepository<SurveyNode>().GetAsync(sn => sn.Id == firstNode.Id && !sn.IsDeleted, cancellationToken, queryable => queryable.Include(sn => sn.Options)
+            .Include(sn => sn.Rules)))!;
+
+            mapper.Map<SurveyOptionDTO, SurveyOption>(new SurveyOption());
+            mapper.Map<SurveyRuleDTO, SurveyRule>(new SurveyRule());
+
             return new()
             {
                 Id = session.Id,

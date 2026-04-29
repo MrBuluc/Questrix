@@ -1,5 +1,7 @@
 ﻿using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Questrix.Application.DTOs;
+using Questrix.Application.Exceptions;
 using Questrix.Application.Features.Sessions.Commands.Start;
 using Questrix.Application.Features.Sessions.Commands.SubmitResponse;
 using Questrix.Application.Features.Sessions.Queries.GetCurrentQuestion;
@@ -11,11 +13,11 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Questrix.Infrastructure.Telegram.Services
 {
-    public class UpdateHandler(IMediator mediator, ITelegramKeyboardService telegramKeyboardService, ITelegramTextFormatter telegramTextFormatter) : IUpdateHandler
+    public class UpdateHandler(ITelegramKeyboardService telegramKeyboardService, ITelegramTextFormatter telegramTextFormatter, IServiceScopeFactory serviceScopeFactory) : IUpdateHandler
     {
-        private readonly IMediator mediator = mediator;
         private readonly ITelegramKeyboardService telegramKeyboardService = telegramKeyboardService;
         private readonly ITelegramTextFormatter telegramTextFormatter = telegramTextFormatter;
+        private readonly IServiceScopeFactory serviceScopeFactory = serviceScopeFactory;
 
         public async Task HandleAsync(ITelegramBotClient telegramBotClient, Update update, CancellationToken cancellationToken)
         {
@@ -33,6 +35,17 @@ namespace Questrix.Infrastructure.Telegram.Services
 
             try
             {
+                //0. Greetings
+                if (text == "/start")
+                {
+                    await telegramBotClient.SendMessage(chatId, "Merhaba 👋\r\nBen QuestrixBot, akıllı anket asistanınız.\r\n\r\nAnketleri sohbet tarzında yürüteceğim; sıkıcı formlar yok, sadece basit bir sohbet.\r\n\r\n📌 Başlamak için:\r\nDavet kodunuzu gönderin.\r\n\r\nBundan sonra, adım adım sorular sorup yanıtlarınızı toplayacağım.\r\n\r\nBaşlayalım 🚀", cancellationToken: cancellationToken);
+
+                    return;
+                }
+
+                await using AsyncServiceScope serviceScope = serviceScopeFactory.CreateAsyncScope();
+                IMediator mediator = serviceScope.ServiceProvider.GetRequiredService<IMediator>();
+
                 // 1. Check active session
                 GetCurrentQuestionSessionQueryResponse? currentQuestion = await mediator.Send(new GetCurrentQuestionSessionQueryRequest
                 {
@@ -67,16 +80,28 @@ namespace Questrix.Infrastructure.Telegram.Services
 
                 if (response.IsCompleted)
                 {
-                    await telegramBotClient.SendMessage(chatId, "Survey completed. Thank you!",  replyMarkup: new ReplyKeyboardRemove(), cancellationToken: cancellationToken);
+                    await telegramBotClient.SendMessage(chatId, "🎉 İşte bu kadar—işiniz bitti!\r\n\r\nYanıtlarınız kaydedildi.\r\nBaşka bir davet kodunuz varsa, onu göndererek yeni bir ankete başlayabilirsiniz.",  replyMarkup: new ReplyKeyboardRemove(), cancellationToken: cancellationToken);
 
                     return;
                 }
 
                 await SendNode(telegramBotClient, chatId.Value, response.SurveyNode, cancellationToken);
             }
+            catch (InvitationCodeNotFoundException)
+            {
+                await telegramBotClient.SendMessage(update.Message!.Chat.Id, "❌ Bu kodla ilgili bir anket bulamadım.\r\n\r\nLütfen kodu doğru girdiğinizden emin olun ve tekrar deneyin.", cancellationToken: cancellationToken);
+            }
+            catch (InvitationCodeMaxUsegeException)
+            {
+                await telegramBotClient.SendMessage(update.Message!.Chat.Id, "⚠️ Bu davet kodunun kullanım limiti dolmuştur.\r\n\r\nAnket, artık yeni katılımcı kabul etmemektedir.", cancellationToken: cancellationToken);
+            }
+            catch (InvitationCodeExpiredException)
+            {
+                await telegramBotClient.SendMessage(update.Message!.Chat.Id, "⚠️ Davet kodu geçersiz.\r\n\r\nGirdiğiniz kod bulunamadı veya süresi dolmuş olabilir.\r\nLütfen kodu kontrol edip tekrar deneyin.", cancellationToken: cancellationToken);
+            }
             catch (Exception e)
             {
-                await telegramBotClient.SendMessage(update.Message!.Chat!.Id, $"Something went wrong. {e}", cancellationToken: cancellationToken);
+                await telegramBotClient.SendMessage(update.Message!.Chat.Id, $"Something went wrong. {e}", cancellationToken: cancellationToken);
             }
         }
 

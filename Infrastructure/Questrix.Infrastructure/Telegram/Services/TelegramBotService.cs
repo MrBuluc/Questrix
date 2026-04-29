@@ -11,7 +11,10 @@ namespace Questrix.Infrastructure.Telegram.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            telegramBotClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, cancellationToken: cancellationToken);
+            telegramBotClient.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOptions: new()
+            {
+                AllowedUpdates = []
+            }, cancellationToken: cancellationToken);
 
             return Task.CompletedTask;
         }

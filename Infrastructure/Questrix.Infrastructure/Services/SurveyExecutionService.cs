@@ -7,7 +7,7 @@ namespace Questrix.Infrastructure.Services
     {
         public Guid? ResolveNextNode(SurveyNode surveyNode, string answer)
         {
-            if (surveyNode.Rules is null)
+            if (surveyNode.Rules.Count == 0)
                 return null;
 
             foreach (SurveyRule rule in surveyNode.Rules)

@@ -1,7 +1,6 @@
 using Questrix.Application;
 using Questrix.Application.Exceptions;
 using Questrix.Infrastructure;
-using Questrix.Infrastructure.Telegram.Services.Interfaces;
 using Questrix.Mapper;
 using Questrix.Persistence;
 
@@ -50,7 +49,5 @@ app.ConfigureExceptionHandlingMiddleware();
 app.UseAuthorization();
 
 app.MapControllers();
-
-//await app.Services.GetRequiredService<ITelegramBotService>().StartAsync(CancellationToken.None);
 
 app.Run();
