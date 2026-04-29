@@ -21,7 +21,8 @@ namespace Questrix.Infrastructure.Telegram.Services
                 .Select(kb => new[] { kb })
                 .ToArray())
         {
-            ResizeKeyboard = true
+            ResizeKeyboard = true,
+            OneTimeKeyboard = true
         };
 
         private static ReplyKeyboardMarkup BuildLinearScale(string metadata)
@@ -33,7 +34,8 @@ namespace Questrix.Infrastructure.Telegram.Services
                 .Select(kb => new[] { kb })
                 .ToArray())
             {
-                ResizeKeyboard = true
+                ResizeKeyboard = true,
+                OneTimeKeyboard = true
             };
         }
     }

@@ -12,9 +12,10 @@ using System.Text.Json;
 
 namespace Questrix.Application.Features.Sessions.Commands.SubmitResponse
 {
-    public class SubmitResponseSessionCommandHandler(IMapper mapper, IUnitOfWork unitOfWork, ISurveyExecutionService surveyExecutionService) : BaseHandler(mapper, unitOfWork), IRequestHandler<SubmitResponseSessionCommandRequest, SubmitResponseSessionCommandResponse>
+    public class SubmitResponseSessionCommandHandler(IMapper mapper, IUnitOfWork unitOfWork, ISurveyExecutionService surveyExecutionService, ITelegramTextValidator telegramTextValidator) : BaseHandler(mapper, unitOfWork), IRequestHandler<SubmitResponseSessionCommandRequest, SubmitResponseSessionCommandResponse>
     {
         private readonly ISurveyExecutionService surveyExecutionService = surveyExecutionService;
+        private readonly ITelegramTextValidator telegramTextValidator = telegramTextValidator;
 
         public async Task<SubmitResponseSessionCommandResponse> Handle(SubmitResponseSessionCommandRequest request, CancellationToken cancellationToken)
         {
@@ -22,7 +23,12 @@ namespace Questrix.Application.Features.Sessions.Commands.SubmitResponse
 
             Survey survey = (await unitOfWork.GetReadRepository<Survey>().GetAsync(s => s.Id == session.SurveyId && !s.IsDeleted, cancellationToken, include: queryable => queryable.Include(s => s.Nodes)))
                 ?? throw new SurveyNotFoundException();
-            SurveyNode currentNode = survey.Nodes.First(sn => sn.Id == session.CurrentNodeId && !sn.IsDeleted);
+            SurveyNode currentNode = (await unitOfWork.GetReadRepository<SurveyNode>().GetAsync(sn => sn.Id == session.CurrentNodeId && !sn.IsDeleted, cancellationToken, queryable => queryable.Include(sn => sn.Rules)
+            .Include(sn => sn.Options)))!;
+
+            
+            if (!telegramTextValidator.ValidateNonTextInput(currentNode, request.Answer))
+                throw new MessageNotValidateException();
 
             await unitOfWork.GetWriteRepository<Response>().AddAsync(new()
             {
@@ -33,9 +39,6 @@ namespace Questrix.Application.Features.Sessions.Commands.SubmitResponse
                     Value = request.Answer
                 })
             }, cancellationToken);
-
-            currentNode = (await unitOfWork.GetReadRepository<SurveyNode>().GetAsync(sn => sn.Id == currentNode.Id && !sn.IsDeleted, cancellationToken, queryable => queryable.Include(sn => sn.Rules)
-            .Include(sn => sn.Options)))!;
 
             Guid? nextNodeId = surveyExecutionService.ResolveNextNode(currentNode, request.Answer);
             SurveyNode? nextNode = null;
@@ -52,8 +55,7 @@ namespace Questrix.Application.Features.Sessions.Commands.SubmitResponse
             else
             {
                 session.CurrentNodeId = nextNodeId.Value;
-                nextNode = survey.Nodes.First(sn => sn.Id == session.CurrentNodeId && !sn.IsDeleted);
-                nextNode = (await unitOfWork.GetReadRepository<SurveyNode>().GetAsync(sn => sn.Id == nextNode.Id && !sn.IsDeleted, cancellationToken, queryable => queryable.Include(sn => sn.Rules)
+                nextNode = (await unitOfWork.GetReadRepository<SurveyNode>().GetAsync(sn => sn.Id == nextNodeId && !sn.IsDeleted, cancellationToken, queryable => queryable.Include(sn => sn.Rules)
             .Include(sn => sn.Options)))!;
             }
 

@@ -99,6 +99,10 @@ namespace Questrix.Infrastructure.Telegram.Services
             {
                 await telegramBotClient.SendMessage(update.Message!.Chat.Id, "⚠️ Davet kodu geçersiz.\r\n\r\nGirdiğiniz kod bulunamadı veya süresi dolmuş olabilir.\r\nLütfen kodu kontrol edip tekrar deneyin.", cancellationToken: cancellationToken);
             }
+            catch (MessageNotValidateException)
+            {
+                await telegramBotClient.SendMessage(update.Message!.Chat.Id, "“❌ Lütfen aşağıdaki seçeneklerden birini seçin.”", cancellationToken: cancellationToken);
+            }
             catch (Exception e)
             {
                 await telegramBotClient.SendMessage(update.Message!.Chat.Id, $"Something went wrong. {e}", cancellationToken: cancellationToken);
