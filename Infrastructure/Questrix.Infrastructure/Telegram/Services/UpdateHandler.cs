@@ -90,6 +90,8 @@ namespace Questrix.Infrastructure.Telegram.Services
             catch (InvitationCodeNotFoundException)
             {
                 await telegramBotClient.SendMessage(update.Message!.Chat.Id, "❌ Bu kodla ilgili bir anket bulamadım.\r\n\r\nLütfen kodu doğru girdiğinizden emin olun ve tekrar deneyin.", cancellationToken: cancellationToken);
+
+                throw;
             }
             catch (InvitationCodeMaxUsegeException)
             {
@@ -106,6 +108,8 @@ namespace Questrix.Infrastructure.Telegram.Services
             catch (Exception e)
             {
                 await telegramBotClient.SendMessage(update.Message!.Chat.Id, $"Something went wrong. {e}", cancellationToken: cancellationToken);
+
+                throw;
             }
         }
 

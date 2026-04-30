@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Questrix.Infrastructure", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DockerComposeFiles", "DockerComposeFiles", "{29A283A9-8795-43EA-B265-050A5A9304AF}"
 	ProjectSection(SolutionItems) = preProject
+		DockerComposeFiles\backup.sql = DockerComposeFiles\backup.sql
 		DockerComposeFiles\docker-compose.yml = DockerComposeFiles\docker-compose.yml
 	EndProjectSection
 EndProject

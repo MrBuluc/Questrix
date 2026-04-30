@@ -15,6 +15,7 @@ namespace Questrix.Persistence.Contexts
         public DbSet<SurveyNode> SurveyNodes { get; set; }
         public DbSet<SurveyOption> SurveyOptions { get; set; }
         public DbSet<SurveyRule> SurveyRules { get; set; }
+        public DbSet<ExceptionLog> ExceptionLogs { get; set; }
 
         public QuestrixDbContext(DbContextOptions<QuestrixDbContext> dbContextOptions) : base(dbContextOptions) { }
 

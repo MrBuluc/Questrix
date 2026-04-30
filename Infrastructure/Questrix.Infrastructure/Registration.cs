@@ -24,6 +24,7 @@ namespace Questrix.Infrastructure
             services.AddSingleton<ITelegramKeyboardService, TelegramKeyboardService>();
             services.AddSingleton<ITelegramTextFormatter, TelegramTextFormatter>();
             services.AddSingleton<ITelegramTextValidator, TelegramTextValidator>();
+            services.AddScoped<ILogService, LogService>();
 
             return services;
         }

@@ -365,3 +365,4 @@ FodyWeavers.xsd
 /Infrastructure/Questrix.Persistence/PrivateInformations.json
 /Presentation/Questrix.API/appsettings.Development.json
 /Presentation/Questrix.Worker/appsettings.Development.json
+/DockerComposeFiles/backup.sql
